@@ -7,6 +7,11 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 type Query {
     users: [User] @all
     user(id: ID @eq): User @find
+    userQuery(
+        search: String!
+        order_column: String
+        order_direction: String
+    ): [User]
 
     posts: [Post] @all
     post(id: ID @eq): Post @find
@@ -28,9 +33,16 @@ type Post {
     title: String!
     content: String!
     comments: [Comment] @hasMany
-    user: User! @belongsTo 
+    user: User! @belongsTo
+    status:  PostStatus!
     created_at: DateTime!
     updated_at: DateTime!
+}
+
+enum PostStatus {
+  PENDING @enum(value: 0)
+  APPROVED @enum(value: 1)
+  REJECTED @enum(value: 2)
 }
 
 type Comment {
@@ -40,4 +52,22 @@ type Comment {
     user: User! @belongsTo 
     created_at: DateTime!
     updated_at: DateTime!
+}
+
+type Mutation {
+    createPost(
+        user_id: ID @rules(apply: ["required"])
+        title: String @rules(apply: ["required"])
+        content: String @rules(apply: ["required"])
+    ): Post @create
+
+    updatePost(
+        id: ID @rules(apply: ["required"])
+        title: String @rules(apply: ["required"])
+        content: String @rules(apply: ["required"])
+    ): Post @update
+
+    deletePost(
+        id: ID! @rules(apply: ["required"])
+    ): Post @delete
 }
